@@ -1,0 +1,223 @@
+
+== Sweep: 1 uvicorn worker (v1) ==
+ concurrency  requests   rps  p50_ms  p95_ms  p99_ms  errors  replicas  littles_N_est  repeat host_load_1m
+           1       193  48.2    14.3    54.3   142.7       0         1           0.69       1       [3.23]
+           2       402 100.5    17.3    37.1    67.2       0         1           1.74       1       [3.13]
+           4       485 121.2    31.3    51.9    68.4       0         1           3.79       1       [3.44]
+           8       468 117.0    67.6   105.3   130.3       0         1           7.91       1       [3.44]
+          16       398  99.5   157.1   271.4   305.5       0         1          15.63       1        [3.4]
+           1       307  76.8    11.1    24.2    37.3       0         1           0.85       2       [3.21]
+           2       420 105.0    16.9    34.4    46.2       0         1           1.77       2       [3.11]
+           4       453 113.2    32.7    58.6    84.8       0         1           3.70       2       [3.02]
+           8       376  94.0    80.5   151.9   208.6       0         1           7.57       2       [3.02]
+          16       444 111.0   134.9   258.8   291.5       0         1          14.97       2       [2.94]
+           1       314  78.5    10.8    23.2    36.9       0         1           0.85       3       [3.27]
+           2       271  67.8    24.4    61.6   103.0       0         1           1.65       3       [3.08]
+           4       367  91.8    38.9    77.8   120.8       0         1           3.57       3       [3.72]
+           8       465 116.2    67.1   105.9   131.5       0         1           7.80       3       [3.72]
+          16       237  59.2   274.1   440.1   528.7       0         1          16.23       3        [4.3]
+
+== Cost per row (concurrency 1) ==
+ batch  requests  rps  rows_per_s  p50_ms  p95_ms  ms_per_row_p50  ms_per_row_throughput  errors
+     1       181 45.2        45.2    17.1    52.1          17.100                22.1239       0
+   100       218 54.5      5450.0    13.9    39.9           0.139                 0.1835       0
+
+== Sweep: workers2_uvicorn ==
+ concurrency  requests   rps  p50_ms  p95_ms  p99_ms  errors  replicas  littles_N_est  repeat host_load_1m
+           1        67  16.8    56.0    86.1   105.4       0         1           0.94       1       [4.87]
+           2       127  31.8    60.7    89.4   111.1       0         1           1.93       1       [4.87]
+           4       211  52.8    67.6   127.0   156.2       0         1           3.57       1       [4.96]
+           8       465 116.2    63.8   105.5   163.8       0         1           7.41       1       [4.81]
+          16       661 165.2    93.7   159.6   188.4       0         1          15.48       1       [5.06]
+           1        74  18.5    52.6    66.0    95.3       0         1           0.97       2       [4.66]
+           2       133  33.2    55.6    98.0   137.9       0         1           1.85       2       [4.66]
+           4       254  63.5    60.7    88.8   100.6       0         1           3.85       2       [4.36]
+           8       484 121.0    61.5   100.5   160.3       0         1           7.44       2       [5.13]
+          16       761 190.2    81.6   124.4   189.0       0         1          15.52       2       [5.28]
+           1        77  19.2    50.6    65.1   115.2       0         1           0.97       3        [5.5]
+           2       107  26.8    64.8   127.5   237.6       0         1           1.74       3        [5.5]
+           4       287  71.8    51.6    74.4   153.1       0         1           3.70       3       [5.46]
+           8       464 116.0    65.5   104.6   129.7       0         1           7.60       3       [5.42]
+          16       818 204.5    77.5   111.6   126.8       0         1          15.85       3       [5.15]
+
+== Sweep: workers2_tcp_nodelay ==
+ concurrency  requests   rps  p50_ms  p95_ms  p99_ms  errors  replicas  littles_N_est  repeat host_load_1m
+           1       315  78.8    10.9    23.5    44.0       0         1           0.86       1       [5.22]
+           2       549 137.2    11.5    34.5    53.1       0         1           1.58       1       [4.96]
+           4       740 185.0    20.1    46.3    69.4       0         1           3.72       1       [4.72]
+           8       945 236.2    31.3    62.1    76.8       0         1           7.39       1       [4.91]
+          16       937 234.2    66.2   120.5   155.5       0         1          15.50       1       [4.91]
+           1       338  84.5    10.0    22.8    37.0       0         1           0.84       2       [4.67]
+           2       694 173.5     9.8    22.4    37.3       0         1           1.70       2       [4.62]
+           4       577 144.2    22.9    67.7    95.2       0         1           3.30       2       [4.81]
+           8       836 209.0    34.6    74.2   116.4       0         1           7.23       2        [4.5]
+          16       878 219.5    71.5   124.7   170.9       0         1          15.69       2        [4.5]
+           1       206  51.5    13.7    53.7   105.9       0         1           0.71       3       [4.22]
+           2       535 133.8    11.9    36.5    50.1       0         1           1.59       3       [4.21]
+           4       722 180.5    19.3    42.0    63.9       0         1           3.48       3       [4.43]
+           8       912 228.0    32.3    67.1    93.3       0         1           7.36       3       [4.56]
+          16       958 239.5    64.3   106.4   125.5       0         1          15.40       3       [4.56]
+
+== Analysis ==
+{
+  "analysis_1worker": {
+    "median_table": [
+      {
+        "concurrency": 1,
+        "rps": 76.8,
+        "p50_ms": 11.1,
+        "p95_ms": 24.2,
+        "p99_ms": 37.3,
+        "errors": 0.0
+      },
+      {
+        "concurrency": 2,
+        "rps": 100.5,
+        "p50_ms": 17.3,
+        "p95_ms": 37.1,
+        "p99_ms": 67.2,
+        "errors": 0.0
+      },
+      {
+        "concurrency": 4,
+        "rps": 113.2,
+        "p50_ms": 32.7,
+        "p95_ms": 58.6,
+        "p99_ms": 84.8,
+        "errors": 0.0
+      },
+      {
+        "concurrency": 8,
+        "rps": 116.2,
+        "p50_ms": 67.6,
+        "p95_ms": 105.9,
+        "p99_ms": 131.5,
+        "errors": 0.0
+      },
+      {
+        "concurrency": 16,
+        "rps": 99.5,
+        "p50_ms": 157.1,
+        "p95_ms": 271.4,
+        "p99_ms": 305.5,
+        "errors": 0.0
+      }
+    ],
+    "peak_rps": 116.2,
+    "knee_littles_law_N": 1.29,
+    "plateau_start_concurrency": 2,
+    "slo_p95_ms": 80.0,
+    "capacity_under_slo_rps": 113.2,
+    "capacity_under_slo_at_concurrency": 4
+  },
+  "analysis_workers2_uvicorn": {
+    "median_table": [
+      {
+        "concurrency": 1,
+        "rps": 18.5,
+        "p50_ms": 52.6,
+        "p95_ms": 66.0,
+        "p99_ms": 105.4,
+        "errors": 0.0
+      },
+      {
+        "concurrency": 2,
+        "rps": 31.8,
+        "p50_ms": 60.7,
+        "p95_ms": 98.0,
+        "p99_ms": 137.9,
+        "errors": 0.0
+      },
+      {
+        "concurrency": 4,
+        "rps": 63.5,
+        "p50_ms": 60.7,
+        "p95_ms": 88.8,
+        "p99_ms": 153.1,
+        "errors": 0.0
+      },
+      {
+        "concurrency": 8,
+        "rps": 116.2,
+        "p50_ms": 63.8,
+        "p95_ms": 104.6,
+        "p99_ms": 160.3,
+        "errors": 0.0
+      },
+      {
+        "concurrency": 16,
+        "rps": 190.2,
+        "p50_ms": 81.6,
+        "p95_ms": 124.4,
+        "p99_ms": 188.4,
+        "errors": 0.0
+      }
+    ],
+    "peak_rps": 190.2,
+    "knee_littles_law_N": 10.0,
+    "plateau_start_concurrency": 16,
+    "slo_p95_ms": 80.0,
+    "capacity_under_slo_rps": 18.5,
+    "capacity_under_slo_at_concurrency": 1
+  },
+  "capacity_change_workers2_uvicorn": {
+    "peak_rps_ratio": 1.64,
+    "slo_capacity_ratio": 0.16
+  },
+  "analysis_workers2_tcp_nodelay": {
+    "median_table": [
+      {
+        "concurrency": 1,
+        "rps": 78.8,
+        "p50_ms": 10.9,
+        "p95_ms": 23.5,
+        "p99_ms": 44.0,
+        "errors": 0.0
+      },
+      {
+        "concurrency": 2,
+        "rps": 137.2,
+        "p50_ms": 11.5,
+        "p95_ms": 34.5,
+        "p99_ms": 50.1,
+        "errors": 0.0
+      },
+      {
+        "concurrency": 4,
+        "rps": 180.5,
+        "p50_ms": 20.1,
+        "p95_ms": 46.3,
+        "p99_ms": 69.4,
+        "errors": 0.0
+      },
+      {
+        "concurrency": 8,
+        "rps": 228.0,
+        "p50_ms": 32.3,
+        "p95_ms": 67.1,
+        "p99_ms": 93.3,
+        "errors": 0.0
+      },
+      {
+        "concurrency": 16,
+        "rps": 234.2,
+        "p50_ms": 66.2,
+        "p95_ms": 120.5,
+        "p99_ms": 155.5,
+        "errors": 0.0
+      }
+    ],
+    "peak_rps": 234.2,
+    "knee_littles_law_N": 2.55,
+    "plateau_start_concurrency": 8,
+    "slo_p95_ms": 80.0,
+    "capacity_under_slo_rps": 228.0,
+    "capacity_under_slo_at_concurrency": 8
+  },
+  "capacity_change_workers2_tcp_nodelay": {
+    "peak_rps_ratio": 2.02,
+    "slo_capacity_ratio": 2.01
+  }
+}
+
+Wrote partA/loadtest_results.json

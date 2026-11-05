@@ -14,3 +14,4 @@ starter/
 *.zip
 Mod4_Assignment_Student.pdf
 *.log
+!partA/earlier_runs_no_uvloop/*.log
