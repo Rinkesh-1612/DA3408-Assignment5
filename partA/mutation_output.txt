@@ -1,0 +1,7 @@
+unchanged code: 37 passed, 6 warnings in 4.36s
+change 'no cross-field rule': 1 failed, 36 passed, 6 warnings in 3.92s -> caught
+change 'batch limit 1000': 1 failed, 36 passed, 6 warnings in 4.41s -> caught
+change 'no request-ID echo': 4 failed, 33 passed, 6 warnings in 3.85s -> caught
+change 'count /metrics': 2 failed, 35 passed, 6 warnings in 4.01s -> caught
+change 'leak the exception': 1 failed, 36 passed, 6 warnings in 5.14s -> caught
+result: 5 of 5 changes caught

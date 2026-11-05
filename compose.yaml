@@ -1,0 +1,197 @@
+# compose.yaml -- SwiftParcel ETA service (AIOps Module 4, Assignment 5).
+#
+# Use the Makefile. It sets the project name "da-aiops-a5".
+# The project name keeps these containers apart from other stacks on this host.
+#
+# Long-running services:
+#   api         Part A, model v1, 1 worker, host port 8010 (default profile)
+#   api-v2      Part A image with model v2, host port 8012 (profile "release")
+#   api-2w      Part A, model v1, "uvicorn --workers 2", host port 8011 (profile "scale")
+#   api-2w-asyncio        Same as api-2w, with "--loop asyncio --http h11", host port 8014 (profile "scale")
+#   api-2w-asyncio-fixed  Same as api-2w-asyncio, started with partA/serve_workers.py, host port 8013 (profile "scale")
+#   mlflow-prod Part B, "models:/eta-model@prod", host port 5101 (profile "mlflow")
+#   mlflow-cand Part B, "models:/eta-model@candidate", host port 5102 (profile "mlflow")
+#
+# One-off jobs (run them with "docker compose run --rm <name>"):
+#   tests, loadtest, mlflow-register, shadow, ray-verify, smoke
+#
+# CPU limit: each server gets 2 CPUs. The assignment targets a laptop with 2 cores.
+
+x-api-image: &api-image
+  build:
+    context: .
+    target: api
+  image: swiftparcel-eta:api
+
+x-tools-image: &tools-image
+  build:
+    context: .
+    target: tools
+  image: swiftparcel-eta:tools
+
+x-api-health: &api-health
+  test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=2).status == 200 else 1)"]
+  interval: 5s
+  timeout: 3s
+  retries: 10
+  start_period: 10s
+
+services:
+  # Part A: REST service
+  api:
+    <<: *api-image
+    environment:
+      ETA_MODEL: data/eta_v1.joblib
+    ports: ["8010:8000"]
+    cpus: 2
+    healthcheck: *api-health
+
+  api-v2:
+    <<: *api-image
+    profiles: ["release"]
+    environment:
+      ETA_MODEL: data/eta_v2.joblib
+    ports: ["8012:8000"]
+    cpus: 2
+    healthcheck: *api-health
+
+  api-2w:
+    <<: *api-image
+    profiles: ["scale"]
+    environment:
+      ETA_MODEL: data/eta_v1.joblib
+    command: ["uvicorn", "eta_app:app", "--app-dir", "partA", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+    ports: ["8011:8000"]
+    cpus: 2
+    healthcheck: *api-health
+
+  api-2w-asyncio:
+    <<: *api-image
+    profiles: ["scale"]
+    environment:
+      ETA_MODEL: data/eta_v1.joblib
+    command: ["uvicorn", "eta_app:app", "--app-dir", "partA", "--host", "0.0.0.0", "--port", "8000",
+              "--workers", "2", "--loop", "asyncio", "--http", "h11"]
+    ports: ["8014:8000"]
+    cpus: 2
+    healthcheck: *api-health
+
+  api-2w-asyncio-fixed:
+    <<: *api-image
+    profiles: ["scale"]
+    environment:
+      ETA_MODEL: data/eta_v1.joblib
+    command: ["python", "partA/serve_workers.py", "--workers", "2", "--port", "8000",
+              "--loop", "asyncio", "--http", "h11"]
+    ports: ["8013:8000"]
+    cpus: 2
+    healthcheck: *api-health
+
+  tests:
+    <<: *tools-image
+    profiles: ["jobs"]
+    volumes:
+      - ./partA:/app/partA
+      - ./partB:/app/partB
+    command: ["python", "-m", "pytest", "-q", "partA/test_eta_app.py", "partB/test_gate.py"]
+
+  loadtest:
+    <<: *api-image
+    profiles: ["jobs"]
+    volumes:
+      - ./partA:/app/partA
+    command: ["python", "partA/run_loadtest.py", "--url", "http://api:8000/v1/models/eta:predict",
+              "--variant", "workers2=http://api-2w:8000/v1/models/eta:predict",
+              "--variant", "workers2_asyncio=http://api-2w-asyncio:8000/v1/models/eta:predict",
+              "--variant", "workers2_asyncio_fixed=http://api-2w-asyncio-fixed:8000/v1/models/eta:predict",
+              "--repeats", "5", "--out", "partA/loadtest_results.json"]
+
+  mutation:
+    <<: *tools-image
+    profiles: ["jobs"]
+    volumes:
+      - ./partA:/app/partA
+    command: ["bash", "-c", "python partA/mutation_check.py | tee partA/mutation_output.txt"]
+
+  probe:
+    <<: *api-image
+    profiles: ["jobs"]
+    volumes:
+      - ./partA:/app/partA
+    command: ["bash", "-c", "python partA/probe_keepalive.py --url http://api:8000 --url http://api-2w:8000 --url http://api-2w-asyncio:8000 --url http://api-2w-asyncio-fixed:8000 | tee partA/keepalive_probe.txt"]
+
+  # Part B: MLflow registry, gate and shadow
+  mlflow-register:
+    <<: *tools-image
+    profiles: ["mlflow", "jobs"]
+    volumes:
+      - mlflow-state:/state
+      - ./partB:/app/partB
+    command: ["bash", "-c", "python partB/eta_mlflow.py register && python partB/eta_mlflow.py gate --out partB/gate_output.txt"]
+
+  mlflow-prod:
+    <<: *tools-image
+    profiles: ["mlflow"]
+    volumes:
+      - mlflow-state:/state
+    command: ["mlflow", "models", "serve", "-m", "models:/eta-model@prod", "-h", "0.0.0.0", "-p", "5101", "--env-manager", "local"]
+    ports: ["5101:5101"]
+    cpus: 2
+    depends_on:
+      mlflow-register:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:5101/ping', timeout=2).status == 200 else 1)"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 15s
+
+  mlflow-cand:
+    <<: *tools-image
+    profiles: ["mlflow"]
+    volumes:
+      - mlflow-state:/state
+    command: ["mlflow", "models", "serve", "-m", "models:/eta-model@candidate", "-h", "0.0.0.0", "-p", "5102", "--env-manager", "local"]
+    ports: ["5102:5102"]
+    cpus: 2
+    depends_on:
+      mlflow-register:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:5102/ping', timeout=2).status == 200 else 1)"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 15s
+
+  shadow:
+    <<: *tools-image
+    profiles: ["jobs"]
+    volumes:
+      - ./partB:/app/partB
+    command: ["python", "partB/eta_mlflow.py", "shadow",
+              "--prod-url", "http://mlflow-prod:5101/invocations",
+              "--cand-url", "http://mlflow-cand:5102/invocations",
+              "--out", "partB/shadow_output.txt"]
+
+  # Part C: Ray Serve sticky canary
+  ray-verify:
+    <<: *tools-image
+    profiles: ["jobs"]
+    cpus: 2
+    shm_size: "2gb"
+    volumes:
+      - ./partC:/app/partC
+    command: ["python", "partC/verify_ray.py", "--out", "partC/verify_output.txt"]
+
+  # Part D: release gate
+  smoke:
+    <<: *api-image
+    profiles: ["jobs"]
+    volumes:
+      - ./partD:/app/partD
+    command: ["python", "partD/smoke_eta.py", "--url", "http://api:8000", "--expect-version", "v1", "--max-p95-ms", "80"]
+
+volumes:
+  mlflow-state:

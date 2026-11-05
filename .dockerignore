@@ -1,0 +1,12 @@
+.git
+.venv
+data
+starter
+mlruns
+mlartifacts
+mlflow.db
+**/__pycache__
+**/.pytest_cache
+*.zip
+*.pdf
+*.log

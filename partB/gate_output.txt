@@ -1,0 +1,148 @@
+# Part B2 -- promotion gate
+# generated: 2026-10-31 09:40:36 UTC
+# machine: {"platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.41", "python": "3.12.14", "cpu_count": 8, "usable_cpus": 8, "memory": "23.5 GiB", "mlflow": "3.15.1"}
+# tracking: sqlite:////state/mlflow.db
+
+Registry:
+| version | alias | bundle |
+|---|---|---|
+| 1 | prod | v1 |
+| 2 | candidate | v2 |
+
+== default thresholds ==
+thresholds: {'min_rel_gain': 0.03, 'max_p95_ms': 10.0, 'max_slice_regression': 0.05}
+metric          prod   candidate
+mae           11.955       6.105
+mae_rush      19.680       8.580
+mae_rain      11.623       6.285
+p95_ms         4.440       5.700
+rows: 2000 (rush 571, rain 994)
+criterion          value  threshold  passed
+mae_gain          0.4894     0.0300  True
+p95_latency       5.7002    10.0000  True
+rush_slice        8.5795    20.6639  True
+rain_slice        6.2853    12.2039  True
+PROMOTE: True
+
+== min_rel_gain=0.60 ==
+thresholds: {'min_rel_gain': 0.6, 'max_p95_ms': 10.0, 'max_slice_regression': 0.05}
+metric          prod   candidate
+mae           11.955       6.105
+mae_rush      19.680       8.580
+mae_rain      11.623       6.285
+p95_ms         4.120       3.791
+rows: 2000 (rush 571, rain 994)
+criterion          value  threshold  passed
+mae_gain          0.4894     0.6000  False
+p95_latency       3.7907    10.0000  True
+rush_slice        8.5795    20.6639  True
+rain_slice        6.2853    12.2039  True
+PROMOTE: False
+
+JSON:
+{
+  "default thresholds": {
+    "thresholds": {
+      "min_rel_gain": 0.03,
+      "max_p95_ms": 10.0,
+      "max_slice_regression": 0.05
+    },
+    "prod": {
+      "mae": 11.9553,
+      "mae_rush": 19.679859894921194,
+      "mae_rain": 11.622736418511066,
+      "p95_ms": 4.440333013189956,
+      "n_rows": 2000,
+      "n_rush": 571,
+      "n_rain": 994
+    },
+    "candidate": {
+      "mae": 6.104850000000001,
+      "mae_rush": 8.579509632224168,
+      "mae_rain": 6.285311871227364,
+      "p95_ms": 5.700200935825705,
+      "n_rows": 2000,
+      "n_rush": 571,
+      "n_rain": 994
+    },
+    "criteria": {
+      "mae_gain": {
+        "value": 0.4894,
+        "threshold": 0.03,
+        "rule": "relative MAE gain >= threshold",
+        "passed": true
+      },
+      "p95_latency": {
+        "value": 5.7002,
+        "threshold": 10.0,
+        "rule": "candidate p95_ms <= threshold",
+        "passed": true
+      },
+      "rush_slice": {
+        "value": 8.5795,
+        "threshold": 20.6639,
+        "rule": "candidate mae_rush <= prod mae_rush * (1 + max_slice_regression)",
+        "passed": true
+      },
+      "rain_slice": {
+        "value": 6.2853,
+        "threshold": 12.2039,
+        "rule": "candidate mae_rain <= prod mae_rain * (1 + max_slice_regression)",
+        "passed": true
+      }
+    },
+    "promote": true
+  },
+  "min_rel_gain=0.60": {
+    "thresholds": {
+      "min_rel_gain": 0.6,
+      "max_p95_ms": 10.0,
+      "max_slice_regression": 0.05
+    },
+    "prod": {
+      "mae": 11.9553,
+      "mae_rush": 19.679859894921194,
+      "mae_rain": 11.622736418511066,
+      "p95_ms": 4.119861230719835,
+      "n_rows": 2000,
+      "n_rush": 571,
+      "n_rain": 994
+    },
+    "candidate": {
+      "mae": 6.104850000000001,
+      "mae_rush": 8.579509632224168,
+      "mae_rain": 6.285311871227364,
+      "p95_ms": 3.790717443916946,
+      "n_rows": 2000,
+      "n_rush": 571,
+      "n_rain": 994
+    },
+    "criteria": {
+      "mae_gain": {
+        "value": 0.4894,
+        "threshold": 0.6,
+        "rule": "relative MAE gain >= threshold",
+        "passed": false
+      },
+      "p95_latency": {
+        "value": 3.7907,
+        "threshold": 10.0,
+        "rule": "candidate p95_ms <= threshold",
+        "passed": true
+      },
+      "rush_slice": {
+        "value": 8.5795,
+        "threshold": 20.6639,
+        "rule": "candidate mae_rush <= prod mae_rush * (1 + max_slice_regression)",
+        "passed": true
+      },
+      "rain_slice": {
+        "value": 6.2853,
+        "threshold": 12.2039,
+        "rule": "candidate mae_rain <= prod mae_rain * (1 + max_slice_regression)",
+        "passed": true
+      }
+    },
+    "promote": false
+  }
+}

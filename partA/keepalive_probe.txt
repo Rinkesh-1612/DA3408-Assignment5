@@ -1,0 +1,9 @@
+service                              connection     p50 ms   p95 ms
+http://api:8000                      new              16.0     39.8
+http://api:8000                      kept             12.4     75.6
+http://api-2w:8000                   new              14.9     40.8
+http://api-2w:8000                   kept             14.7     64.3
+http://api-2w-asyncio:8000           new              15.8     60.3
+http://api-2w-asyncio:8000           kept             56.5    128.1
+http://api-2w-asyncio-fixed:8000     new              15.9     73.8
+http://api-2w-asyncio-fixed:8000     kept             15.2     82.8

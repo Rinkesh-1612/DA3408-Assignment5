@@ -1,0 +1,17 @@
+# requirements.txt: exact versions of all packages. One file serves all four parts.
+fastapi==0.141.1
+starlette==1.6.0
+pydantic==2.13.4
+uvicorn==0.52.3
+scikit-learn==1.9.0
+scipy==1.18.0
+numpy==2.5.2
+pandas==2.3.3
+joblib==1.5.3
+prometheus_client==0.26.0
+requests==2.34.2
+httpx==0.28.1
+pytest==9.2.0
+mlflow==3.15.1
+ray[serve]==2.58.0
+PyYAML==6.0.3

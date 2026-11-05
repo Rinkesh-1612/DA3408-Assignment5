@@ -1,0 +1,45 @@
+### 1. v1 service, expect v1 (must pass)
+ Container da-aiops-a5-smoke-run-0d5fdceb212c Creating 
+ Container da-aiops-a5-smoke-run-0d5fdceb212c Created 
+Smoke test: http://api:8000/v1/models/eta:predict  expect-version=v1  max-p95-ms=80
+  [PASS] health           status=200 body={"status":"ok","model_version":"v1"}
+  [PASS] version          status=200 model_version='v1'
+  [PASS] contract         rows=3 predictions=[27.8, 136.2, 51.1]
+  [PASS] sanity-distance  distance_km=[2.0, 10.0, 30.0, 60.0, 120.0] -> eta=[25.3, 45.9, 97.5, 174.9, 329.6]
+  [PASS] sanity-traffic   traffic_index=[0.0, 0.25, 0.5, 0.75, 1.0] -> eta=[105.4, 116.1, 126.8, 137.4, 148.1]
+  [PASS] sanity-range     eta=[2.0, 22.9, 98.6, 270.0, 477.4] (allowed 1..600 min)
+  [PASS] invalid-422      status codes={'hour=25': 422, 'distance_km=-5': 422, 'infeasible 200km/30 stops': 422, 'empty batch': 422}
+  [PASS] latency-p95      p50=13.9 ms p95=61.0 ms (limit 80 ms)
+Result: 8/8 checks passed -> RELEASE ALLOWED
+exit code: 0
+
+### 2. v2 service, expect v2 (must pass)
+ Container da-aiops-a5-smoke-run-7050be32cf43 Creating 
+ Container da-aiops-a5-smoke-run-7050be32cf43 Created 
+Smoke test: http://api-v2:8000/v1/models/eta:predict  expect-version=v2  max-p95-ms=80
+  [PASS] health           status=200 body={"status":"ok","model_version":"v2"}
+  [PASS] version          status=200 model_version='v2'
+  [PASS] contract         rows=3 predictions=[27.0, 122.7, 50.8]
+  [PASS] sanity-distance  distance_km=[2.0, 10.0, 30.0, 60.0, 120.0] -> eta=[25.6, 42.5, 98.0, 154.1, 267.7]
+  [PASS] sanity-traffic   traffic_index=[0.0, 0.25, 0.5, 0.75, 1.0] -> eta=[107.9, 124.5, 147.9, 173.5, 186.2]
+  [PASS] sanity-range     eta=[14.4, 36.5, 113.7, 223.3, 398.2] (allowed 1..600 min)
+  [PASS] invalid-422      status codes={'hour=25': 422, 'distance_km=-5': 422, 'infeasible 200km/30 stops': 422, 'empty batch': 422}
+  [PASS] latency-p95      p50=10.7 ms p95=28.6 ms (limit 80 ms)
+Result: 8/8 checks passed -> RELEASE ALLOWED
+exit code: 0
+
+### 3. v1 service, expect v2 (must fail: the wrong version is deployed)
+ Container da-aiops-a5-smoke-run-057afa5d0440 Creating 
+ Container da-aiops-a5-smoke-run-057afa5d0440 Created 
+Smoke test: http://api:8000/v1/models/eta:predict  expect-version=v2  max-p95-ms=80
+  [PASS] health           status=200 body={"status":"ok","model_version":"v1"}
+  [FAIL] version          status=200 model_version='v1'
+  [PASS] contract         rows=3 predictions=[27.8, 136.2, 51.1]
+  [PASS] sanity-distance  distance_km=[2.0, 10.0, 30.0, 60.0, 120.0] -> eta=[25.3, 45.9, 97.5, 174.9, 329.6]
+  [PASS] sanity-traffic   traffic_index=[0.0, 0.25, 0.5, 0.75, 1.0] -> eta=[105.4, 116.1, 126.8, 137.4, 148.1]
+  [PASS] sanity-range     eta=[2.0, 22.9, 98.6, 270.0, 477.4] (allowed 1..600 min)
+  [PASS] invalid-422      status codes={'hour=25': 422, 'distance_km=-5': 422, 'infeasible 200km/30 stops': 422, 'empty batch': 422}
+  [PASS] latency-p95      p50=10.6 ms p95=16.4 ms (limit 80 ms)
+Result: 7/8 checks passed -> RELEASE BLOCKED (1 check(s) failed)
+
+exit code: 1

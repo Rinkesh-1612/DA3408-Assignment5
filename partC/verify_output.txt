@@ -1,0 +1,33 @@
+==============================================================================
+Part C2 -- sticky canary verification (Ray Serve)
+machine: python 3.12.14 | Linux 6.8.0-147-generic | host CPUs visible: 8 | RAM: 23.5 GiB
+ray 2.58.0: cluster with num_cpus=2; serve HTTP on 127.0.0.1:8100
+candidate autoscaling_config: {'min_replicas': 1, 'initial_replicas': 1, 'max_replicas': 3, 'target_ongoing_requests': 2, 'upscale_delay_s': 3, 'downscale_delay_s': 30, 'metrics_interval_s': 1, 'look_back_period_s': 5}
+bucket function: sha256('eta-canary-v1v2:' + customer_id)[:8 bytes] / 2**64 ; v2 if bucket < weight
+------------------------------------------------------------------------------
+deployed weight=0.2 (ready after 0.0s)
+  deployment EtaModelV1   status=DeploymentStatus.HEALTHY replicas={'RUNNING': 2}
+  deployment EtaModelV2   status=DeploymentStatus.HEALTHY replicas={'RUNNING': 1}
+  deployment Router       status=DeploymentStatus.HEALTHY replicas={'RUNNING': 1}
+  ray cluster CPU=2.0  available CPU=1.05  reserved now=0.95
+  reservation: router 0.2 + prod 2 x 0.25 + candidate (max 3) x 0.25 = 1.45 CPU (limit 2.0)
+------------------------------------------------------------------------------
+[PASS] (a) candidate share within +/-4 pp of weight: 202/1000 customers on v2 = 0.202 (target 0.2, binomial SE 1.3 pp, offline choose_arm() predicts 202)
+[PASS] (a') model_version matches arm for every response: 0 mismatches; replicas that answered: v1=2, v2=1
+------------------------------------------------------------------------------
+[PASS] (b) 200 customers keep the same arm on a second call: 200/200 unchanged (51 of them on v2)
+------------------------------------------------------------------------------
+deleted application 'eta-canary' and waited 5s
+deployed weight=0.2 (ready after 0.0s)
+[PASS] (c) same arms after redeploying the identical app: 200-sample: 200/200 unchanged; all customers: 1000/1000 unchanged
+------------------------------------------------------------------------------
+deployed weight=0.5 (ready after 0.1s)
+[PASS] (d) weight 0.2 -> 0.5: no customer moves v2 -> v1: v2->v1 moves: 0; v1->v2 moves: 298; stayed on v2: 202/202; new v2 share = 0.500
+[PASS] (d') new share within +/-4 pp of 0.5: 0.500
+  deployment EtaModelV1   status=DeploymentStatus.HEALTHY replicas={'RUNNING': 2}
+  deployment EtaModelV2   status=DeploymentStatus.HEALTHY replicas={'RUNNING': 1}
+  deployment Router       status=DeploymentStatus.HEALTHY replicas={'RUNNING': 1}
+------------------------------------------------------------------------------
+[PASS] (e) X-Beta: 1 forces the candidate for 50 v1 customers: 50/50 answered by v2; without the header the same customers go back to ['v1']
+------------------------------------------------------------------------------
+SUMMARY: 7/7 checks passed

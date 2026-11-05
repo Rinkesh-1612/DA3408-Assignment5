@@ -1,0 +1,42 @@
+# Part B3 -- shadow comparison
+# generated: 2026-10-31 09:41:13 UTC
+# machine: {"platform": "Linux-6.8.0-147-generic-x86_64-with-glibc2.41", "python": "3.12.14", "cpu_count": 8, "usable_cpus": 8, "memory": "23.5 GiB", "mlflow": "3.15.1"}
+# tracking: sqlite:////state/mlflow.db
+
+== Shadow comparison: same requests to prod and candidate ==
+requests: 200  compared: 200
+(i)   mean |prod - candidate|      = 9.484 min
+(ii)  requests with |diff| > 10 min = 35.0 %
+      max |diff|                    = 51.7 min
+(iii) server      version   p50 ms   p95 ms   p99 ms  errors
+      prod             v1    13.16    34.39   104.11       0
+      candidate        v2    13.04    37.52    84.76       0
+
+JSON:
+{
+  "n_requests": 200,
+  "n_compared": 200,
+  "mean_abs_diff_min": 9.484,
+  "pct_diff_gt_10min": 35.0,
+  "max_abs_diff_min": 51.7,
+  "prod": {
+    "url": "http://mlflow-prod:5101/invocations",
+    "errors": 0,
+    "model_versions": [
+      "v1"
+    ],
+    "p50_ms": 13.16,
+    "p95_ms": 34.39,
+    "p99_ms": 104.11
+  },
+  "candidate": {
+    "url": "http://mlflow-cand:5102/invocations",
+    "errors": 0,
+    "model_versions": [
+      "v2"
+    ],
+    "p50_ms": 13.04,
+    "p95_ms": 37.52,
+    "p99_ms": 84.76
+  }
+}

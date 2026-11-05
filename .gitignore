@@ -1,0 +1,16 @@
+# Generated data and models. Make them again with "make data".
+data/
+# MLflow state (SQLite database and artifacts).
+mlflow.db
+mlruns/
+mlartifacts/
+# Python and tools.
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+# Course material and the unpacked starter (not part of the solution repository).
+starter/
+*.zip
+Mod4_Assignment_Student.pdf
+*.log
